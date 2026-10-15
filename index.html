@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Digital Profile Card</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.25);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-border {
+            position: relative;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            padding: 3px;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col justify-between">
+
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <header class="sticky top-0 z-50 glass-card border-b border-slate-800/80">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="#" class="text-xl font-bold tracking-tight flex items-center gap-2">
+                <span class="gradient-text font-extrabold text-2xl">&lt;Dev/&gt;</span>
+                <span class="text-slate-200">Portfolio</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+                <a href="#about" class="hover:text-indigo-400 transition-colors">About</a>
+                <a href="#skills" class="hover:text-indigo-400 transition-colors">Skills</a>
+                <a href="#projects" class="hover:text-indigo-400 transition-colors">Projects</a>
+                <a href="#contact" class="hover:text-indigo-400 transition-colors">Contact</a>
+            </nav>
+
+            <button id="shareBtn" onclick="copyProfileLink()" class="flex items-center gap-2 text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-full hover:bg-indigo-600 hover:text-white transition-all">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>Share Card</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 flex-grow">
+
+        <section id="about" class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <!-- Decorative Glow Backgrounds -->
+            <div class="absolute -top-24 -right-24 w-60 h-60 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row gap-6 md:gap-8 items-center text-center md:text-left relative z-10">
+                <!-- Profile Image with Gradient Ring -->
+                <div class="gradient-border flex-shrink-0 animate-float">
+                    <img id="profileImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" 
+                         alt="Zaid Jr. Photo" 
+                         onerror="this.src='https://placehold.co/180x180/4f46e5/ffffff?text=Zaid+Jr.'"
+                         class="w-32 h-32 md:w-36 md:h-36 object-cover rounded-full bg-slate-800" style="transform: rotate(90deg);">
+                </div>
+
+                <!-- Info Section -->
+                <div class="space-y-3 flex-1">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Available for Work & Collaboration
+                    </div>
+                    
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                        Namaste, I'm <span class="gradient-text">Zaid Jr.</span>
+                    </h1>
+                    
+                    <p class="text-slate-300 text-sm sm:text-base max-w-xl font-normal leading-relaxed">
+                        Full-Stack Developer & UI/UX Design Enthusiast. Building clean, elegant, and impactful digital experiences for web and mobile.
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 justify-center md:justify-start pt-2">
+                        <span class="text-xs bg-slate-800/80 text-slate-300 px-3 py-1 rounded-lg border border-slate-700/50"><i class="fa-solid fa-location-dot text-indigo-400 mr-1.5"></i>India</span>
+                        <span class="text-xs bg-slate-800/80 text-slate-300 px-3 py-1 rounded-lg border border-slate-700/50"><i class="fa-solid fa-briefcase text-purple-400 mr-1.5"></i>Freelance / Full-Time</span>
+                        <span class="text-xs bg-slate-800/80 text-slate-300 px-3 py-1 rounded-lg border border-slate-700/50"><i class="fa-solid fa-graduation-cap text-pink-400 mr-1.5"></i>Computer Science</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links Grid -->
+            <div class="mt-8 pt-6 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <a href="https://github.com" target="_blank" class="glass-card glass-card-hover p-3 rounded-xl flex items-center justify-center gap-2 text-slate-300 hover:text-white group">
+                    <i class="fa-brands fa-github text-lg group-hover:scale-110 transition-transform text-white"></i>
+                    <span class="text-xs font-medium">GitHub</span>
+                </a>
+                <a href="https://linkedin.com" target="_blank" class="glass-card glass-card-hover p-3 rounded-xl flex items-center justify-center gap-2 text-slate-300 hover:text-white group">
+                    <i class="fa-brands fa-linkedin text-lg group-hover:scale-110 transition-transform text-sky-400"></i>
+                    <span class="text-xs font-medium">LinkedIn</span>
+                </a>
+                <a href="https://twitter.com" target="_blank" class="glass-card glass-card-hover p-3 rounded-xl flex items-center justify-center gap-2 text-slate-300 hover:text-white group">
+                    <i class="fa-brands fa-x-twitter text-lg group-hover:scale-110 transition-transform text-slate-200"></i>
+                    <span class="text-xs font-medium">Twitter</span>
+                </a>
+                <a href="https://instagram.com" target="_blank" class="glass-card glass-card-hover p-3 rounded-xl flex items-center justify-center gap-2 text-slate-300 hover:text-white group">
+                    <i class="fa-brands fa-instagram text-lg group-hover:scale-110 transition-transform text-pink-400"></i>
+                    <span class="text-xs font-medium">Instagram</span>
+                </a>
+            </div>
+        </section>
+
+        <section id="skills" class="glass-card rounded-3xl p-6 sm:p-8 space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+                    <i class="fa-solid fa-code text-xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Skills & Tech Stack</h2>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-brands fa-react text-2xl text-cyan-400"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">React.js</h3>
+                        <p class="text-[10px] text-slate-400">Frontend</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-brands fa-js text-2xl text-yellow-400"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">JavaScript</h3>
+                        <p class="text-[10px] text-slate-400">ES6+ / TS</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-brands fa-node-js text-2xl text-emerald-500"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">Node.js</h3>
+                        <p class="text-[10px] text-slate-400">Backend</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-brands fa-python text-2xl text-blue-400"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">Python</h3>
+                        <p class="text-[10px] text-slate-400">Scripting / AI</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-solid fa-database text-2xl text-amber-500"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">MongoDB</h3>
+                        <p class="text-[10px] text-slate-400">Database</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-brands fa-css3-alt text-2xl text-blue-500"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">Tailwind CSS</h3>
+                        <p class="text-[10px] text-slate-400">UI Design</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-brands fa-git-alt text-2xl text-orange-500"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">Git & GitHub</h3>
+                        <p class="text-[10px] text-slate-400">Version Control</p>
+                    </div>
+                </div>
+                <div class="glass-card glass-card-hover p-3.5 rounded-xl flex items-center gap-3">
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl text-purple-400"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">Figma / UI</h3>
+                        <p class="text-[10px] text-slate-400">Designing</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-xl bg-purple-500/10 text-purple-400">
+                        <i class="fa-solid fa-laptop-code text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Featured Projects</h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Project Card 1 -->
+                <div class="glass-card glass-card-hover rounded-2xl p-4 flex flex-col justify-between space-y-4 border border-slate-800">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">Fullstack Web App</span>
+                            <div class="flex gap-2">
+                                <a href="#" class="text-slate-400 hover:text-white transition-colors"><i class="fa-brands fa-github"></i></a>
+                                <a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">AI Content Generator</h3>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            An intelligent web tool that generates blogs, social captions, and code snippets using OpenAI API.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-2">
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">React</span>
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Node.js</span>
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Tailwind</span>
+                    </div>
+                </div>
+
+                <!-- Project Card 2 -->
+                <div class="glass-card glass-card-hover rounded-2xl p-4 flex flex-col justify-between space-y-4 border border-slate-800">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">E-Commerce</span>
+                            <div class="flex gap-2">
+                                <a href="#" class="text-slate-400 hover:text-white transition-colors"><i class="fa-brands fa-github"></i></a>
+                                <a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Modern Storefront UI</h3>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            A fast, responsive online store interface with smooth cart interactions and dark mode support.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-2">
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Next.js</span>
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Stripe API</span>
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Framer Motion</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <div class="p-2 rounded-xl bg-pink-500/10 text-pink-400">
+                    <i class="fa-solid fa-paper-plane text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white">Get In Touch</h2>
+                    <p class="text-xs text-slate-400">Have a project or just want to say hi?</p>
+                </div>
+            </div>
+
+            <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-300">Your Name</label>
+                        <input type="text" required placeholder="Aarav Mehta" 
+                               class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-300">Your Email / Phone</label>
+                        <input type="text" required placeholder="aarav@example.com" 
+                               class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-300">Message</label>
+                    <textarea rows="3" required placeholder="Hey Rahul, I'd love to work together on..." 
+                              class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold text-xs rounded-xl shadow-lg hover:opacity-90 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Send Message</span>
+                </button>
+            </form>
+
+            <div id="toastMessage" class="hidden p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs text-center font-medium">
+                ✨ Message Sent Successfully! I will get back to you soon.
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="relative z-10 glass-card border-t border-slate-800/80 py-4 text-center text-xs text-slate-400 mt-8">
+        <p>© <span id="year"></span> Designed & Built with ❤️ for your Profile Link.</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Canvas Particle Effect
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        const particleCount = Math.min(Math.floor(window.innerWidth / 20), 40);
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                alpha: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(129, 140, 248, ${p.alpha})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Copy Link Action
+        function copyProfileLink() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            const btn = document.getElementById('shareBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i><span class="text-emerald-400">Copied!</span>`;
+            
+            if (window.confetti) {
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.1 }
+                });
+            }
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 2000);
+        }
+
+        // Handle Contact Form Submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const toast = document.getElementById('toastMessage');
+            toast.classList.remove('hidden');
+
+            if (window.confetti) {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            e.target.reset();
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
+
